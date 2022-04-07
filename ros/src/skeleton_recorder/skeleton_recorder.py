@@ -73,4 +73,4 @@ class SkeletonRecorder:
         df_skeletons = pd.DataFrame(
             {"timestamp": self._timestamps, "skeleton": self._skeletons}
         )
-        df_skeletons.to_csv(self._out_file_path)
+        df_skeletons.to_csv(self._out_file_path, index=False)
