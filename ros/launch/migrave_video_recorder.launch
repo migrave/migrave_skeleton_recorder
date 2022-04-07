@@ -1,0 +1,12 @@
+<launch>
+  <arg name="skeleton_topic" default="/qt_nuitrack_app/skeletons"/>
+  <arg name="is_record_topic" default="/migrave_data_recording/is_record"/>
+  <arg name="output_directory" default="/home/qtrobot/Documents"/>
+
+  <node name="migrave_skeleton_recorder" pkg="migrave_skeleton_recorder" type="migrave_skeleton_recorder" output="screen" respawn="true">
+    <param name="skeleton_topic" value="$(arg skeleton_topic)" />
+    <param name="is_record_topic" value="$(arg is_record_topic)" />
+    <param name="output_directory" value="$(arg output_directory)" />
+  </node>
+  
+</launch>
