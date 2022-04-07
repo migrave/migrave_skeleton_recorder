@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import rospy
+from std_msgs.msg import Bool
+from datetime import datetime
+
+from qt_nuitrack_app.msg import Skeletons
+
+from skeleton_recorder.skeleton_recorder import SkeletonRecorder
+
+# Skeletons message structure
+# qt_nuitrack_app/SkeletonInfo[] skeletons
+#     int32 id
+#     qt_nuitrack_app/JointInfo[] joints
+#         uint8 type
+#         float32 confidence
+#         float32[] real
+#         float32[] projection
+#         float32[] orientation
+
+
+class SkeletonCapture:
+    def __init__(
+        self,
+        is_record_topic,
+        skeleton_topic,
+        out_directory,
+    ):
+
+        rospy.init_node("migrave_skeleton_recorder", anonymous=True)
+        self._skeleton_recorder = SkeletonRecorder(
+            out_directory=out_directory,
+        )
+
+        self._is_record_subscriber = rospy.Subscriber(
+            is_record_topic, Bool, self._is_record_callback
+        )
+        self._skeleton_subscriber = rospy.Subscriber(
+            skeleton_topic, Skeletons, self._skeleton_callback
+        )
+
+        # This flag is used to block recording if memory exceeeds limits
+        self._allow_recording = True  # TODO add a memory usage watch topic
+
+    def _skeleton_callback(self, data):
+        skeleton = data.skeletons  # list
+        self._skeleton_recorder.add_skeleton(
+            skeleton, is_throw_error_if_not_recording=False)
+
+    def _is_record_callback(self, data):
+
+        is_record = data.data
+        try:
+            if is_record:
+                if self._allow_recording:
+                    # rospy.loginfo("Starting to record video")
+                    ext = "csv"
+                    now = datetime.now()
+                    # time in YYYY-MM-DD_HH_MM-SS format
+                    time = now.strftime("%Y-%m-%d_%H-%M-%S")
+                    # unixtimestamp 16 digits
+                    stamp = int(datetime.timestamp(now) * 1000000)
+                    file_name = f"{time}_{stamp}"
+                    out_file_name = f"skeleton_{file_name}.{ext}"
+                    rospy.loginfo("Starting to record skeleton data")
+                    self._skeleton_recorder.start_recording(
+                        out_file_name=out_file_name)
+                else:
+                    rospy.logerr(
+                        "Recording will not happen " "due to memory limits exceeded"
+                    )
+            else:
+                if self._skeleton_recorder._is_recording:
+                    rospy.loginfo("Stopped recording skeleton data")
+                    self._skeleton_recorder.stop_recording()
+
+        except RuntimeError as e:
+            rospy.logerr(e)
+
+
+if __name__ == "__main__":
+    # default parameters
+    skeleton_topic = "/qt_nuitrack_app/skeletons"
+    is_record_topic = "/migrave_data_recording/is_record"
+    output_directory = "/home/qtrobot/Documents/migrave"
+    # update parameter if provided by ros parameter server
+    parameter_name = "/migrave_data_recorder/is_record_topic"
+    if rospy.has_param(parameter_name):
+        is_record_topic = rospy.get_param(parameter_name)
+
+    SkeletonCapture(
+        skeleton_topic=skeleton_topic,
+        is_record_topic=is_record_topic,
+        out_directory=output_directory,
+    )
+
+    rospy.spin()
