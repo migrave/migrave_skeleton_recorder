@@ -26,3 +26,19 @@ Stop recording
 rostopic pub /migrave_data_recorder/is_record std_msgs/Bool "False"
 ```
 
+## Project Structure
+```
+├── CMakeLists.txt
+├── README.md
+├── package.xml
+├── requirements.txt
+├── ros
+│   ├── launch
+│   │   └── migrave_skeleton_recorder.launch
+│   ├── scripts
+│   │   └── migrave_skeleton_recorder
+│   └── src
+│       └── skeleton_recorder
+│           └── skeleton_recorder.py
+└── setup.py
+```
