@@ -27,7 +27,6 @@ class SkeletonCapture:
         out_directory,
     ):
 
-        rospy.init_node("migrave_skeleton_recorder", anonymous=True)
         self._skeleton_recorder = SkeletonRecorder(
             out_directory=out_directory,
         )
@@ -80,6 +79,7 @@ class SkeletonCapture:
 
 if __name__ == "__main__":
     # default parameters
+    rospy.init_node("migrave_skeleton_recorder", anonymous=True)
     skeleton_topic = "/qt_nuitrack_app/skeletons"
     is_record_topic = "/migrave_data_recording/is_record"
     output_directory = "/home/qtrobot/Documents/migrave"
