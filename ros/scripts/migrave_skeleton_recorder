@@ -80,13 +80,9 @@ class SkeletonCapture:
 if __name__ == "__main__":
     # default parameters
     rospy.init_node("migrave_skeleton_recorder", anonymous=True)
-    skeleton_topic = "/qt_nuitrack_app/skeletons"
-    is_record_topic = "/migrave_data_recording/is_record"
-    output_directory = "/home/qtrobot/Documents/migrave"
-    # update parameter if provided by ros parameter server
-    parameter_name = "/migrave_data_recorder/is_record_topic"
-    if rospy.has_param(parameter_name):
-        is_record_topic = rospy.get_param(parameter_name)
+    skeleton_topic = rospy.get_param("~skeleton_topic", "/qt_nuitrack_app/skeletons")
+    output_directory = rospy.get_param("~output_directory", "/migrave_data_recording/is_record")
+    is_record_topic = rospy.get_param("~is_record_topic", "/home/qtrobot/Documents/migrave")
 
     SkeletonCapture(
         skeleton_topic=skeleton_topic,
